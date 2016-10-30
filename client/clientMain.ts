@@ -1,4 +1,6 @@
 ﻿/// <reference path="./typings/Compress.d.ts" />
+/// <reference path="./node_modules/@types/core-js/index.d.ts" />
+/// <reference path="./node_modules/@types/whatwg-fetch/index.d.ts" />
 
 import {AssetManager } from "./hexLibraries/AssetManager";
 import {HexagonColor, distance } from "../common/hexLibraries/HexUtils";
@@ -6,11 +8,8 @@ import {HexBoard} from "./hexLibraries/HexBoard";
 import {MenuManager} from "./hexLibraries/MenuManager";
 declare var Hammer;
 
-export class Main {
+export class ClientMain {
     static run() {
-
-
-
         AssetManager.instance = new AssetManager(startApp);
         var size = { width: 80, height: 80 };
         var base = { x: 40, y: 55 };
@@ -27,7 +26,7 @@ export class Main {
     }
 }
 
-Main.run();
+ClientMain.run();
 
 function startApp() {
     var baseColor = new HexagonColor('#FFFFFF');
@@ -287,7 +286,7 @@ function startApp() {
 
     draw();
 
-    (<any>window).fetch('http://localhost:3000/gameState',{})
+    fetch('http://localhost:9847/game-state',{})
         .then(response => {
             // Examine the text in the response  
             response.text()

@@ -1,6 +1,7 @@
 ﻿import {GridHexagonConstants} from "../../common/hexLibraries/GridHexagonConstants";
 import {DrawingUtilities, Node, orderBy, distance, HexagonColor } from "../../common/hexLibraries/HexUtils";
 import {GridHexagon} from "./GridHexagon";
+import {HexBoardModel} from "../../common/models/hexBoard";
 
 export class HexBoard {
     hexList = [];
@@ -45,17 +46,11 @@ export class HexBoard {
         this.viewPort.y = Math.min(this.viewPort.y, size.height + this.viewPort.padding - this.viewPort.height)
     }
 
-    initialize(state) {
-        const str = state.board.boardStr;
-        this.setSize(state.board.width, state.board.height);
+    initialize(board:HexBoardModel) {
+        const str = board.boardStr;
+        this.setSize(board.width, board.height);
         var baseColor=new HexagonColor('#AFFFFF');
-
-        const factionColors = [];
-        for (var i = 0; i < state.factions.length; i++) {
-            let faction = state.factions[i];
-            factionColors[i] = new HexagonColor(faction.color);
-        }
-
+        var otherColor=new HexagonColor('#AFF000');
 
         const ys = str.split('|');
 
@@ -76,26 +71,13 @@ export class HexBoard {
                     gridHexagon.hexColor = baseColor;
 
                 } else {
-                    gridHexagon.hexColor = factionColors[factionIndex - 1];
+                    gridHexagon.hexColor = otherColor;
                 }
                 gridHexagon.buildPaths();
                 this.addHexagon(gridHexagon);
             }
         }
         this.reorderHexList();
-
-
-        for (var i = 0; i < state.factions.length; i++) {
-            var faction = state.factions[i];
-            const fColor = new HexagonColor(faction.color);
-            for (let j = 0; j < faction.units.length; j++) {
-                const unit = faction.units[j];
-                let gridHexagon = this.xyToHexIndex(unit.x, unit.y);
-                if (!gridHexagon) continue;
-                gridHexagon.setColor(fColor);
-                gridHexagon.setUnit(unit.unitType);
-            }
-        }
 
 
     }

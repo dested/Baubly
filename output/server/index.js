@@ -1,3 +1,3 @@
-require('./libs/system.js');
+require('./libs');
 require('./js/app.js');
-System.import('server/main');
+System.import('server/serverMain');
