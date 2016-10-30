@@ -1,19 +1,19 @@
 ﻿import {GridHexagonConstants} from "./gridHexagonConstants";
-import {Node, orderBy, distance} from "../../common/hexLibraries/HexUtils";
+import {Node, HexUtils, Vector3d} from "../../common/hexLibraries/HexUtils";
 import {GridHexagon} from "./GridHexagon";
 import {HexBoardModel} from "../../common/models/hexBoard";
 import {HexagonColor, DrawingUtilities} from "../utils/drawingUtilities";
 
 export class HexBoard {
-    hexList = [];
-    hexBlock = {};
+    hexList: GridHexagon[] = [];
+    hexBlock: {[key: number]: GridHexagon} = {};
     boardSize = {width: 0, height: 0};
     viewPort = {x: 0, y: 0, width: 400, height: 400, padding: GridHexagonConstants.width * 2};
 
     constructor() {
     }
 
-    xyToHexIndex(x, y) {
+    xyToHexIndex(x, y) :GridHexagon{
         return this.hexBlock[x + y * 5000];
     }
 
@@ -56,7 +56,7 @@ export class HexBoard {
 
         for (var i = 0; i < 15; i++) {
 
-            otherColors[i]=new HexagonColor(DrawingUtilities.colorLuminance('#AFF000',(i/15)));
+            otherColors[i] = new HexagonColor(DrawingUtilities.colorLuminance('#AFF000', (i / 15)));
 
         }
 
@@ -77,7 +77,7 @@ export class HexBoard {
                     gridHexagon.hexColor = baseColor;
 
                 } else {
-                    gridHexagon.hexColor = otherColors[xItem-1];
+                    gridHexagon.hexColor = otherColors[xItem - 1];
                 }
                 gridHexagon.buildPaths();
                 this.addHexagon(gridHexagon);
@@ -88,15 +88,15 @@ export class HexBoard {
 
     }
 
-    gameDimensions() {
+    gameDimensions():{width:number,height:number} {
         const size = {width: 0, height: 0};
         size.width = GridHexagonConstants.width * 3 / 4 * this.boardSize.width;
         size.height = GridHexagonConstants.height() * this.boardSize.height;
         return size;
     }
 
-    getHexAtPoint(clickX, clickY) {
-        let lastClick = null;
+    getHexAtPoint(clickX, clickY): GridHexagon {
+        let lastClick: GridHexagon = null;
         clickX += this.viewPort.x;
         clickY += this.viewPort.y;
 
@@ -123,16 +123,16 @@ export class HexBoard {
         return lastClick;
     }
 
-    addHexagon(hexagon) {
+    addHexagon(hexagon: GridHexagon) {
         this.hexList.push(hexagon);
         this.hexBlock[hexagon.x + hexagon.z * 5000] = hexagon;
     }
 
     reorderHexList() {
-        this.hexList = orderBy(this.hexList, m => (m.z - m.y) * 1000 + (m.x % 2) * -200 + m.height);
+        this.hexList = HexUtils.orderBy(this.hexList, m => (m.z - m.y) * 1000 + (m.x % 2) * -200 + m.height);
     }
 
-    drawBoard(context) {
+    drawBoard(context: CanvasRenderingContext2D) {
         context.save();
         context.translate(-this.viewPort.x, -this.viewPort.y);
         context.lineWidth = 1;
@@ -143,7 +143,7 @@ export class HexBoard {
         context.restore();
     }
 
-    drawHexagon(context, gridHexagon) {
+    drawHexagon(context: CanvasRenderingContext2D, gridHexagon: GridHexagon) {
 
         const x = GridHexagonConstants.width * 3 / 4 * gridHexagon.x;
         let z = gridHexagon.z * GridHexagonConstants.height() + ((gridHexagon.x % 2 === 1) ? (-GridHexagonConstants.height() / 2) : 0);
@@ -165,13 +165,13 @@ export class HexBoard {
 
     }
 
-    pathFind(start, finish) {
-        const mypathStart = new Node(null, start);
-        const mypathEnd = new Node(null, finish);
+    pathFind(start: Vector3d, finish: Vector3d) {
+        const myPathStart = new Node(null, start);
+        const myPathEnd = new Node(null, finish);
         let aStar = [];
-        let open = [mypathStart];
+        let open = [myPathStart];
         let closed = [];
-        const result = [];
+        const result :Vector3d[]= [];
         let neighbours;
         let node;
         let path;
@@ -186,7 +186,7 @@ export class HexBoard {
                 }
             }
             node = open.splice(min, 1)[0];
-            if (node.x === mypathEnd.x && node.y === mypathEnd.y) {
+            if (node.x === myPathEnd.x && node.y === myPathEnd.y) {
                 path = closed[closed.push(node) - 1];
                 do {
                     result.push(path.item);
@@ -204,8 +204,8 @@ export class HexBoard {
                         continue;
                     path = new Node(node, n);
                     if (!aStar[path.value()]) {
-                        path.g = node.g + distance(n, node.item) + (Math.abs((node.item.y + node.item.height) - (n.y + n.height)) * 2);
-                        path.f = path.g + distance(n, finish);
+                        path.g = node.g + HexUtils.distance(n, node.item) + (Math.abs((node.item.y + node.item.height) - (n.y + n.height)) * 2);
+                        path.f = path.g + HexUtils.distance(n, finish);
                         open.push(path);
                         aStar[path.value()] = true;
                     }

@@ -151,7 +151,7 @@ export class GridHexagon {
         return center;
     }
 
-    draw(context) {
+    draw(context:CanvasRenderingContext2D) {
 
         const center = this.hexCenter();
         if (this.drawCache) {
@@ -186,7 +186,7 @@ export class GridHexagon {
                 this.drawIcon(ctx);
                 ctx.restore();
 
-                GridHexagon.setCacheImage(this.height, this.icon, this.hexColor, can);
+                GridHexagon.setCacheImage(this.height, this.icon, this.highlightColor || this.hexColor, can);
                 /*       ctx.strokeStyle='black';
                  ctx.lineWidth=1;
                  ctx.strokeRect(0,0,can.width,can.height);*/

@@ -4,17 +4,22 @@
     base: {x: number;y: number};
     image: HTMLImageElement;
 }
+export interface AssetItem {
+    size: {width: number;height: number};
+    base: {x: number;y: number};
+    url: string;
+}
 export class AssetManager {
-    assetQueue = {};
+    assetQueue: {[key: string]: AssetItem} = {};
     assets: {[key: string]: Asset} = {};
-    completed = null;
+    completed: ()=>void = null;
     $assetsLoaded = 0;
     $assetsRequested = 0;
 
     static instance: AssetManager;
 
 
-    constructor(completed) {
+    constructor(completed: ()=>void) {
         this.completed = completed;
 
     }
@@ -44,7 +49,7 @@ export class AssetManager {
             image: img,
             size: null,
             base: null,
-            name:name
+            name: name
         };
         this.assets[name].size = this.assetQueue[name].size || {width: img.width, height: img.height};
         this.assets[name].base = this.assetQueue[name].base || {
