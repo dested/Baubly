@@ -1,4 +1,4 @@
-﻿import {Point} from "../Utils";
+﻿import {Point} from "../../common/utils";
 
 export class GridHexagonConstants {
 
@@ -27,10 +27,9 @@ export class GridHexagonConstants {
     };
 
 
-    static width = 35 ;
+    static width = 80 ;
     static heightSkew = .7;
     static depthHeightSkew = .3;
 
 }
 
-export type GameUnitType = "Infantry" | "Tank" | "Base";

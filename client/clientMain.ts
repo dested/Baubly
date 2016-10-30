@@ -3,9 +3,10 @@
 /// <reference path="./node_modules/@types/whatwg-fetch/index.d.ts" />
 
 import {AssetManager } from "./hexLibraries/AssetManager";
-import {HexagonColor, distance } from "../common/hexLibraries/HexUtils";
+import {distance } from "../common/hexLibraries/HexUtils";
 import {HexBoard} from "./hexLibraries/HexBoard";
 import {MenuManager} from "./hexLibraries/MenuManager";
+import {HexagonColor} from "./utils/drawingUtilities";
 declare var Hammer;
 
 export class ClientMain {

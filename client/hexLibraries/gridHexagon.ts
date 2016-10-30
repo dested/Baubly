@@ -1,5 +1,8 @@
-﻿import {GridHexagonConstants} from "../../common/hexLibraries/GridHexagonConstants";
-import {AssetManager} from "./AssetManager";
+﻿///<reference path="../typings/path2d.d.ts"/>
+
+import {GridHexagonConstants} from "./gridHexagonConstants";
+import {AssetManager, Asset} from "./AssetManager";
+import {HexagonColor} from "../utils/drawingUtilities";
 
 export class GridHexagon {
     x = 0;
@@ -7,26 +10,24 @@ export class GridHexagon {
     z = 0;
     height = 0;
 
-    icon = null;
-    unit = null;
+    icon: Asset = null;
 
-    highlightColor = null;
-    hexColor = null;
-    topPath = null;
-    leftDepthPath = null;
-    bottomDepthPath = null;
-    rightDepthPath = null;
-    drawCache = null;
+    highlightColor: HexagonColor = null;
+    hexColor: HexagonColor = null;
+    topPath: Path2D = null;
+    leftDepthPath: Path2D = null;
+    bottomDepthPath: Path2D = null;
+    rightDepthPath: Path2D = null;
+    drawCache: HTMLCanvasElement = null;
 
 
     getDepthHeight() {
-        return Math.max(1,(this.height) * GridHexagonConstants.depthHeight());
+        return Math.max(1, (this.height) * GridHexagonConstants.depthHeight());
     }
 
-    setUnit(name) {
-        this.unit = name;
-        if (this.unit) {
-            this.icon = AssetManager.instance.assets[this.unit];
+    setIcon(name) {
+        if (name) {
+            this.icon = AssetManager.instance.assets[name];
         } else {
             this.icon = null;
         }
@@ -49,52 +50,52 @@ export class GridHexagon {
 
     buildPaths() {
         const depthHeight = this.getDepthHeight();
-        this.topPath = buildPath(GridHexagonConstants.hexagonTopPolygon());
-        this.leftDepthPath = buildPath(GridHexagonConstants.hexagonDepthLeftPolygon(depthHeight));
-        this.bottomDepthPath = buildPath(GridHexagonConstants.hexagonDepthBottomPolygon(depthHeight));
-        this.rightDepthPath = buildPath(GridHexagonConstants.hexagonDepthRightPolygon(depthHeight));
+        this.topPath = GridHexagon.buildPath(GridHexagonConstants.hexagonTopPolygon());
+        this.leftDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthLeftPolygon(depthHeight));
+        this.bottomDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthBottomPolygon(depthHeight));
+        this.rightDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthRightPolygon(depthHeight));
     }
 
-    $getDrawingColor() {
+    getDrawingColor() {
         return this.highlightColor || this.hexColor;
     }
 
     drawLeftDepth(context) {
-        context.strokeStyle = this.$getDrawingColor().dark1;
+        context.strokeStyle = this.getDrawingColor().dark1;
         context.stroke(this.leftDepthPath);
-        context.fillStyle = this.$getDrawingColor().dark1;
+        context.fillStyle = this.getDrawingColor().dark1;
         context.fill(this.leftDepthPath);
     }
 
     drawBottomDepth(context) {
-        context.strokeStyle = this.$getDrawingColor().dark2;
+        context.strokeStyle = this.getDrawingColor().dark2;
         context.stroke(this.bottomDepthPath);
-        context.fillStyle = this.$getDrawingColor().dark2;
+        context.fillStyle = this.getDrawingColor().dark2;
         context.fill(this.bottomDepthPath);
     }
 
     drawRightDepth(context) {
-        context.strokeStyle = this.$getDrawingColor().dark3;
+        context.strokeStyle = this.getDrawingColor().dark3;
         context.stroke(this.rightDepthPath);
-        context.fillStyle = this.$getDrawingColor().dark3;
+        context.fillStyle = this.getDrawingColor().dark3;
         context.fill(this.rightDepthPath);
     }
 
     drawTop(context) {
         /*
          if ((this.y + this.height) != 1)
-         context.strokeStyle = this.$getDrawingColor().darkBorder;
+         context.strokeStyle = this.getDrawingColor().darkBorder;
          else
-         context.strokeStyle = this.$getDrawingColor().color;
+         context.strokeStyle = this.getDrawingColor().color;
          */
         if (this.highlightColor || this.icon) {
-            context.strokeStyle = this.$getDrawingColor().darkBorder;
+            context.strokeStyle = this.getDrawingColor().darkBorder;
             context.stroke(this.topPath);
         } else {
-            context.strokeStyle = this.$getDrawingColor().darkBorder;
+            context.strokeStyle = this.getDrawingColor().darkBorder;
             context.stroke(this.topPath);
         }
-        context.fillStyle = this.$getDrawingColor().color;
+        context.fillStyle = this.getDrawingColor().color;
         context.fill(this.topPath);
     }
 
@@ -156,7 +157,7 @@ export class GridHexagon {
         if (this.drawCache) {
             context.drawImage(this.drawCache, -center.x, -center.y);
         } else {
-            const c = getCacheImage(this.height, this.icon ? this.icon.name : '', this.highlightColor || this.hexColor);
+            const c = GridHexagon.getCacheImage(this.height, this.icon, this.highlightColor || this.hexColor);
             if (!c) {
                 const can = document.createElement('canvas');
                 const ctx = can.getContext('2d');
@@ -185,7 +186,7 @@ export class GridHexagon {
                 this.drawIcon(ctx);
                 ctx.restore();
 
-                setCacheImage(this.height, this.icon ? this.icon.name : '', this.hexColor.color, can);
+                GridHexagon.setCacheImage(this.height, this.icon, this.hexColor, can);
                 /*       ctx.strokeStyle='black';
                  ctx.lineWidth=1;
                  ctx.strokeRect(0,0,can.width,can.height);*/
@@ -221,45 +222,32 @@ export class GridHexagon {
         }
         return neighbors;
     }
-}
 
-function buildPath(path) {
-    const p2d = new Path2D();
-    for (let i = 0; i < path.length; i++) {
-        const point = path[i];
-        p2d.lineTo(point.x, point.y);
+
+    static caches :{[key:string]:HTMLCanvasElement}= {};
+
+    static getCacheImage(height: number, icon: Asset, hexColor: HexagonColor): HTMLCanvasElement {
+        const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
+        return GridHexagon.caches[c]
     }
-    return p2d;
+
+    static setCacheImage(height: number, icon: Asset, hexColor: HexagonColor, img: HTMLCanvasElement) {
+        const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
+        GridHexagon.caches[c] = img;
+    }
+
+    static  buildPath(path): Path2D {
+        const p2d = new Path2D();
+        for (let i = 0; i < path.length; i++) {
+            const point = path[i];
+            p2d.lineTo(point.x, point.y);
+        }
+        return p2d;
+    }
+
+
 }
 
-const caches = {};
-function getCacheImage(height, icon, hexColor) {
-    const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
-    return caches[c]
-}
-function setCacheImage(height, icon, hexColor, img) {
-    const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
-    caches[c] = img;
-}
 
 
-interface Path2D {
-    addPath(path:Path2D, transform?:SVGMatrix);
-    closePath():void;
-    moveTo(x:number, y:number):void;
-    lineTo(x:number, y:number):void;
-    bezierCurveTo(cp1x:number, cp1y:number, cp2x:number, cp2y:number, x:number, y:number):void;
-    quadraticCurveTo(cpx:number, cpy:number, x:number, y:number):void;
-    arc(x:number, y:number, radius:number, startAngle:number, endAngle:number, anticlockwise?:boolean):void;
-    arcTo(x1:number, y1:number, x2:number, y2:number, radius:number):void;
-    /*ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;*/
-    rect(x:number, y:number, w:number, h:number):void;
-}
-interface Path2DConstructor {
-    new ():Path2D;
-    new (d:string):Path2D;
-    new (path:Path2D, fillRule?:string):Path2D;
-    prototype:Path2D;
-}
-declare var Path2D:Path2DConstructor;
  

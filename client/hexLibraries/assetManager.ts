@@ -1,11 +1,17 @@
-﻿export class AssetManager {
+﻿export interface Asset {
+    name: string;
+    size: {width: number;height: number};
+    base: {x: number;y: number};
+    image: HTMLImageElement;
+}
+export class AssetManager {
     assetQueue = {};
-    assets = {};
+    assets: {[key: string]: Asset} = {};
     completed = null;
     $assetsLoaded = 0;
     $assetsRequested = 0;
 
-    static instance:AssetManager;
+    static instance: AssetManager;
 
 
     constructor(completed) {
@@ -29,17 +35,22 @@
     }
 
     addAsset(name, url, size, base) {
-        this.assetQueue[name] = { base, size, url };
+        this.assetQueue[name] = {base, size, url};
         this.$assetsRequested++;
     }
 
     $imageLoaded(img, name) {
         this.assets[name] = {
-            image: img
+            image: img,
+            size: null,
+            base: null,
+            name:name
         };
-        this.assets[name].size = this.assetQueue[name].size || { width: img.width, height: img.height };
-        this.assets[name].base = this.assetQueue[name].base ||
-        { x: this.assets[name].size.width / 2, y: this.assets[name].size.height / 2 };
+        this.assets[name].size = this.assetQueue[name].size || {width: img.width, height: img.height};
+        this.assets[name].base = this.assetQueue[name].base || {
+                x: this.assets[name].size.width / 2,
+                y: this.assets[name].size.height / 2
+            };
 
         this.$assetsLoaded++;
         if (this.$assetsLoaded === this.$assetsRequested) {

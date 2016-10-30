@@ -1,13 +1,14 @@
-﻿import {GridHexagonConstants} from "../../common/hexLibraries/GridHexagonConstants";
-import {DrawingUtilities, Node, orderBy, distance, HexagonColor } from "../../common/hexLibraries/HexUtils";
+﻿import {GridHexagonConstants} from "./gridHexagonConstants";
+import {Node, orderBy, distance} from "../../common/hexLibraries/HexUtils";
 import {GridHexagon} from "./GridHexagon";
 import {HexBoardModel} from "../../common/models/hexBoard";
+import {HexagonColor, DrawingUtilities} from "../utils/drawingUtilities";
 
 export class HexBoard {
     hexList = [];
     hexBlock = {};
-    boardSize = { width: 0, height: 0 };
-    viewPort = { x: 0, y: 0, width: 400, height: 400, padding: GridHexagonConstants.width * 2 };
+    boardSize = {width: 0, height: 0};
+    viewPort = {x: 0, y: 0, width: 400, height: 400, padding: GridHexagonConstants.width * 2};
 
     constructor() {
     }
@@ -46,11 +47,18 @@ export class HexBoard {
         this.viewPort.y = Math.min(this.viewPort.y, size.height + this.viewPort.padding - this.viewPort.height)
     }
 
-    initialize(board:HexBoardModel) {
+    initialize(board: HexBoardModel) {
         const str = board.boardStr;
         this.setSize(board.width, board.height);
-        var baseColor=new HexagonColor('#AFFFFF');
-        var otherColor=new HexagonColor('#AFF000');
+        var baseColor = new HexagonColor('#AFFFFF');
+
+        var otherColors = [];
+
+        for (var i = 0; i < 15; i++) {
+
+            otherColors[i]=new HexagonColor(DrawingUtilities.colorLuminance('#AFF000',(i/15)));
+
+        }
 
         const ys = str.split('|');
 
@@ -59,19 +67,17 @@ export class HexBoard {
             for (let x = 0; x < yItem.length; x += 2) {
                 const xItem = parseInt(yItem[x]);
                 // if (xItem == 0) continue;
-                const factionIndex = parseInt(yItem[x + 1]);
-
 
                 let gridHexagon = new GridHexagon();
                 gridHexagon.x = x / 2;
                 gridHexagon.y = 0;
                 gridHexagon.z = y;
-                gridHexagon.height = xItem==0?0:xItem;
+                gridHexagon.height = xItem == 0 ? 0 : xItem;
                 if (xItem == 0) {
                     gridHexagon.hexColor = baseColor;
 
                 } else {
-                    gridHexagon.hexColor = otherColor;
+                    gridHexagon.hexColor = otherColors[xItem-1];
                 }
                 gridHexagon.buildPaths();
                 this.addHexagon(gridHexagon);
@@ -83,7 +89,7 @@ export class HexBoard {
     }
 
     gameDimensions() {
-        const size = { width: 0, height: 0 };
+        const size = {width: 0, height: 0};
         size.width = GridHexagonConstants.width * 3 / 4 * this.boardSize.width;
         size.height = GridHexagonConstants.height() * this.boardSize.height;
         return size;
