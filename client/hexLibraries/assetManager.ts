@@ -2,12 +2,16 @@
     name: string;
     size: {width: number;height: number};
     base: {x: number;y: number};
-    image: HTMLImageElement;
+    image?: HTMLImageElement;
+    images?: HTMLImageElement[];
+    animated: boolean;
 }
 export interface AssetItem {
     size: {width: number;height: number};
     base: {x: number;y: number};
     url: string;
+    frameIndex?: number;
+    realName: string;
 }
 export class AssetManager {
     static assetQueue: {[key: string]: AssetItem} = {};
@@ -22,9 +26,9 @@ export class AssetManager {
             if (this.assetQueue.hasOwnProperty(name)) {
                 const img = new Image();
 
-                img.onload = (((that, img, name) => () => {
-                    that.$imageLoaded(img, name);
-                }))(this, img, name);
+                img.onload = ()=> {
+                    this.imageLoaded(img, name);
+                };
 
 
                 img.src = this.assetQueue[name].url;
@@ -32,23 +36,43 @@ export class AssetManager {
         }
     }
 
-    static addAsset(name, url, size, base) {
-        this.assetQueue[name] = {base, size, url};
+    static addAsset(name: string, url: string, size: {width: number,height: number}, base: {x: number,y: number}) {
+        this.assetQueue[name] = {base, size, url, realName: name};
         this.$assetsRequested++;
     }
 
-    static  $imageLoaded(img, name) {
-        this.assets[name] = {
-            image: img,
-            size: null,
-            base: null,
-            name: name
-        };
-        this.assets[name].size = this.assetQueue[name].size || {width: img.width, height: img.height};
-        this.assets[name].base = this.assetQueue[name].base || {
-                x: this.assets[name].size.width / 2,
-                y: this.assets[name].size.height / 2
+    static addAssetFrame(name: string, frameIndex: number, url: string, size: {width: number,height: number}, base: {x: number,y: number}) {
+        this.assetQueue[name + frameIndex] = {base, size, url, frameIndex: frameIndex, realName: name};
+        this.$assetsRequested++;
+    }
+
+
+    static  imageLoaded(img, name) {
+        var assetQueue = this.assetQueue[name];
+
+        var asset: Asset = this.assets[assetQueue.realName] || {
+                size: null,
+                base: null,
+                name: name,
+                animated: assetQueue.frameIndex !== undefined
             };
+
+        asset.size = assetQueue.size || {width: img.width, height: img.height};
+        asset.base = assetQueue.base || {
+                x: asset.size.width / 2,
+                y: asset.size.height / 2
+            };
+
+        if (asset.animated) {
+            asset.images = asset.images || [];
+            asset.images[assetQueue.frameIndex] = img;
+
+        } else {
+            asset.image = img;
+
+        }
+
+        this.assets[assetQueue.realName] = asset;
 
         this.$assetsLoaded++;
         if (this.$assetsLoaded === this.$assetsRequested) {

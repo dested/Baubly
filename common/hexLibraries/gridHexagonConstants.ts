@@ -1,4 +1,4 @@
-﻿import {Point} from "../../common/utils";
+﻿import {Point} from "../utils";
 
 export class GridHexagonConstants {
 
@@ -27,7 +27,7 @@ export class GridHexagonConstants {
     };
 
 
-    static width = 80 ;
+    static width = 150 ;
     static heightSkew = .7;
     static depthHeightSkew = .3;
 

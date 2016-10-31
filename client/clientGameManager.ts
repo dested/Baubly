@@ -1,12 +1,16 @@
+///<reference path='./node_modules/@types/core-js' />
+declare var Hammer;
+
+
 import {HexagonColor} from "./utils/drawingUtilities";
-import {HexBoard} from "./hexLibraries/hexBoard";
 import {MenuManager} from "./hexLibraries/menuManager";
 import {HexUtils} from "../common/hexLibraries/hexUtils";
-import {GridHexagon} from "./hexLibraries/gridHexagon";
-declare var Hammer;
+import {ClientSpriteManager} from "./spriteManager";
+import {ClientGridHexagon} from "./hexLibraries/clientGridHexagon";
+import {ClientHexBoard} from "./hexLibraries/clientHexBoard";
 export class ClientGameManager {
     private menuManager: MenuManager;
-    private hexBoard: HexBoard;
+    private hexBoard: ClientHexBoard;
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
 
@@ -19,15 +23,16 @@ export class ClientGameManager {
 
     swipeVelocity = {x: 0, y: 0};
     tapStart = {x: 0, y: 0};
+    private clientSpriteManager: ClientSpriteManager;
 
     constructor() {
 
-        this.hexBoard = new HexBoard();
+        this.hexBoard = new ClientHexBoard();
 
         this.canvas = <HTMLCanvasElement>document.getElementById("hex");
         this.context = this.canvas.getContext("2d");
         var menu = document.getElementById("menu");
-
+        this.clientSpriteManager = new ClientSpriteManager(this);
         this.menuManager = new MenuManager(menu);
 
         var overlay = document.getElementById("overlay");
@@ -36,10 +41,16 @@ export class ClientGameManager {
         mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
         mc.add(new Hammer.Swipe()).recognizeWith(mc.get('pan'));
         mc.add(new Hammer.Tap());
-        /*window.onresize = ()=> {
+        overlay.onmousemove = (ev)=> {
+            var x = <number> ev.pageX;
+            var y = <number> ev.pageY;
+            //this.tapHex(x, y);
+        };
+
+        window.onresize = ()=> {
             this.canvas.width = document.body.clientWidth;
             this.canvas.height = document.body.clientHeight;
-        };*/
+        };
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
         overlay.style.width = '100vw';
@@ -74,45 +85,12 @@ export class ClientGameManager {
             this.swipeVelocity.y = ev.velocityY * 10;
         });
 
-
         mc.on('tap', (ev) => {
             var x = <number> ev.center.x;
             var y = <number> ev.center.y;
-            this.swipeVelocity.x = this.swipeVelocity.y = 0;
 
+            this.tapHex(x, y)
 
-            /* if (this.menuManager.tap(x, y)) {
-             return;
-             }
-             this.menuManager.closeMenu();*/
-
-
-            for (var i = 0; i < this.hexBoard.hexList.length; i++) {
-                var h = this.hexBoard.hexList[i];
-                h.setHighlight(null);
-                h.setHeightOffset(0);
-            }
-
-            var item = this.hexBoard.getHexAtPoint(x, y);
-            if (!item) return;
-
-            item.setHighlight(ClientGameManager.selectedHighlightColor);
-            item.setHeightOffset(1);
-            this.startAction(item);
-
-            /*
-             this.menuManager.openMenu([
-             {image: AssetManager.instance.assets['Icon.Move'].image, action: 'Move'},
-             {image: AssetManager.instance.assets['Icon.Attack'].image, action: 'Attack'}
-             ],
-             new Point(x, y),
-             (selectedItem) => {
-             item.setHighlight(ClientGameManager.selectedHighlightColor);
-             this.menuManager.closeMenu();
-             this.startAction(item);
-             currentState = 'highlighting';
-             });
-             */
         });
 
 
@@ -132,7 +110,7 @@ export class ClientGameManager {
 
     }
 
-    startAction(item: GridHexagon) {
+    startAction(item: ClientGridHexagon) {
         var radius = 5;
         var spots = this.findAvailableSpots(radius, item);
         for (var i = 0; i < spots.length; i++) {
@@ -141,7 +119,7 @@ export class ClientGameManager {
             var path = this.hexBoard.pathFind(item, spot);
             if (path.length > 1 && path.length <= radius + 1) {
                 spot.setHighlight(ClientGameManager.moveHighlightColor);
-                spot.setHeightOffset(.75);
+                spot.setHeightOffset(.25);
             }
         }
     }
@@ -149,8 +127,8 @@ export class ClientGameManager {
 
     findAvailableSpots(radius, center) {
         var items = [];
-        for (var q = 0; q < this.hexBoard.hexList.length; q++) {
-            var item = this.hexBoard.hexList[q];
+        for (var q = 0; q < this.hexBoard.clientHexList.length; q++) {
+            var item = this.hexBoard.clientHexList[q];
             if (HexUtils.distance(center, item) <= radius) {
                 items.push(item);
             }
@@ -160,6 +138,8 @@ export class ClientGameManager {
 
     }
 
+    drawIndex = 0;
+
     draw() {
         requestAnimationFrame(()=> {
             this.draw();
@@ -167,6 +147,7 @@ export class ClientGameManager {
         this.tick();
         this.canvas.width = this.canvas.width;
         this.hexBoard.drawBoard(this.context);
+        this.clientSpriteManager.draw();
         this.menuManager.draw();
     }
 
@@ -190,7 +171,45 @@ export class ClientGameManager {
         {
             this.hexBoard.offsetView(this.swipeVelocity.x, this.swipeVelocity.y);
         }
+        this.clientSpriteManager.tick();
 
     }
 
+    private tapHex(x: number, y: number) {
+        this.swipeVelocity.x = this.swipeVelocity.y = 0;
+
+
+        /* if (this.menuManager.tap(x, y)) {
+         return;
+         }
+         this.menuManager.closeMenu();*/
+
+
+        for (var i = 0; i < this.hexBoard.clientHexList.length; i++) {
+            var h = this.hexBoard.clientHexList[i];
+            h.setHighlight(null);
+            h.setHeightOffset(0);
+        }
+
+        var item = this.hexBoard.getHexAtPoint(x, y);
+        if (!item) return;
+
+        item.setHighlight(ClientGameManager.selectedHighlightColor);
+        item.setHeightOffset(.25);
+        this.startAction(item);
+
+        /*
+         this.menuManager.openMenu([
+         {image: AssetManager.instance.assets['Icon.Move'].image, action: 'Move'},
+         {image: AssetManager.instance.assets['Icon.Attack'].image, action: 'Attack'}
+         ],
+         new Point(x, y),
+         (selectedItem) => {
+         item.setHighlight(ClientGameManager.selectedHighlightColor);
+         this.menuManager.closeMenu();
+         this.startAction(item);
+         currentState = 'highlighting';
+         });
+         */
+    }
 }

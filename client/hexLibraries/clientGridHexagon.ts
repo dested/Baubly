@@ -1,15 +1,11 @@
 ﻿///<reference path="../typings/path2d.d.ts"/>
 
-import {GridHexagonConstants} from "./gridHexagonConstants";
 import {AssetManager, Asset} from "./AssetManager";
 import {HexagonColor, DrawingUtils} from "../utils/drawingUtilities";
+import {GridHexagon} from "../../common/gridHexagon";
+import {GridHexagonConstants} from "../../common/hexLibraries/gridHexagonConstants";
 
-export class GridHexagon {
-    x = 0;
-    y = 0;
-    z = 0;
-    height = 0;
-    heightOffset = 0;
+export class ClientGridHexagon extends GridHexagon {
 
     icon: Asset = null;
 
@@ -20,11 +16,6 @@ export class GridHexagon {
     bottomDepthPath: Path2D = null;
     rightDepthPath: Path2D = null;
     drawCache: HTMLCanvasElement = null;
-
-
-    getDepthHeight() {
-        return Math.max(1, (this.height + this.heightOffset) * GridHexagonConstants.depthHeight());
-    }
 
     setIcon(name: string) {
         if (name) {
@@ -58,10 +49,10 @@ export class GridHexagon {
 
     buildPaths() {
         const depthHeight = this.getDepthHeight();
-        this.topPath = GridHexagon.buildPath(GridHexagonConstants.hexagonTopPolygon());
-        this.leftDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthLeftPolygon(depthHeight));
-        this.bottomDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthBottomPolygon(depthHeight));
-        this.rightDepthPath = GridHexagon.buildPath(GridHexagonConstants.hexagonDepthRightPolygon(depthHeight));
+        this.topPath = ClientGridHexagon.buildPath(GridHexagonConstants.hexagonTopPolygon());
+        this.leftDepthPath = ClientGridHexagon.buildPath(GridHexagonConstants.hexagonDepthLeftPolygon(depthHeight));
+        this.bottomDepthPath = ClientGridHexagon.buildPath(GridHexagonConstants.hexagonDepthBottomPolygon(depthHeight));
+        this.rightDepthPath = ClientGridHexagon.buildPath(GridHexagonConstants.hexagonDepthRightPolygon(depthHeight));
     }
 
     getDrawingColor() {
@@ -172,7 +163,7 @@ export class GridHexagon {
         if (this.drawCache) {
             context.drawImage(this.drawCache, -center.x, -center.y);
         } else {
-            const c = GridHexagon.getCacheImage(this.getDepthHeight(), this.icon, this.highlightColor || this.hexColor);
+            const c = ClientGridHexagon.getCacheImage(this.getDepthHeight(), this.icon, this.highlightColor || this.hexColor);
             if (!c) {
                 const can = document.createElement('canvas');
                 const ctx = can.getContext('2d');
@@ -201,7 +192,7 @@ export class GridHexagon {
                 this.drawIcon(ctx);
                 ctx.restore();
 
-                GridHexagon.setCacheImage(this.getDepthHeight(), this.icon, this.highlightColor || this.hexColor, can);
+                ClientGridHexagon.setCacheImage(this.getDepthHeight(), this.icon, this.highlightColor || this.hexColor, can);
                 /*       ctx.strokeStyle='black';
                  ctx.lineWidth=1;
                  ctx.strokeRect(0,0,can.width,can.height);*/
@@ -243,12 +234,12 @@ export class GridHexagon {
 
     static getCacheImage(height: number, icon: Asset, hexColor: HexagonColor): HTMLCanvasElement {
         const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
-        return GridHexagon.caches[c]
+        return ClientGridHexagon.caches[c]
     }
 
     static setCacheImage(height: number, icon: Asset, hexColor: HexagonColor, img: HTMLCanvasElement) {
         const c = `${icon ? icon.name : ''}-${height}-${hexColor.color}`;
-        GridHexagon.caches[c] = img;
+        ClientGridHexagon.caches[c] = img;
     }
 
     static  buildPath(path): Path2D {
