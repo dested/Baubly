@@ -1,13 +1,10 @@
-///<reference path='./node_modules/@types/core-js' />
-declare var Hammer;
-
-
+import {ClientHeliSprite} from "./clientSpriteManager";
 import {HexagonColor} from "./utils/drawingUtilities";
 import {MenuManager} from "./hexLibraries/menuManager";
 import {HexUtils} from "../common/hexLibraries/hexUtils";
-import {ClientSpriteManager} from "./spriteManager";
 import {ClientGridHexagon} from "./hexLibraries/clientGridHexagon";
 import {ClientHexBoard} from "./hexLibraries/clientHexBoard";
+declare var Hammer;
 export class ClientGameManager {
     private menuManager: MenuManager;
     private hexBoard: ClientHexBoard;
@@ -23,16 +20,20 @@ export class ClientGameManager {
 
     swipeVelocity = {x: 0, y: 0};
     tapStart = {x: 0, y: 0};
-    private clientSpriteManager: ClientSpriteManager;
+    private fpsMeter;
 
     constructor() {
+        this.fpsMeter = new (<any>window).FPSMeter(document.body, {
+            right: '5px',
+            left: 'auto',
+            heat: 1
+        });
 
         this.hexBoard = new ClientHexBoard();
 
         this.canvas = <HTMLCanvasElement>document.getElementById("hex");
         this.context = this.canvas.getContext("2d");
         var menu = document.getElementById("menu");
-        this.clientSpriteManager = new ClientSpriteManager(this);
         this.menuManager = new MenuManager(menu);
 
         var overlay = document.getElementById("overlay");
@@ -44,7 +45,7 @@ export class ClientGameManager {
         overlay.onmousemove = (ev)=> {
             var x = <number> ev.pageX;
             var y = <number> ev.pageY;
-            //this.tapHex(x, y);
+            this.tapHex(x, y);
         };
 
         window.onresize = ()=> {
@@ -147,8 +148,9 @@ export class ClientGameManager {
         this.tick();
         this.canvas.width = this.canvas.width;
         this.hexBoard.drawBoard(this.context);
-        this.clientSpriteManager.draw();
         this.menuManager.draw();
+
+        this.fpsMeter.tick();
     }
 
     tick() {
@@ -171,7 +173,7 @@ export class ClientGameManager {
         {
             this.hexBoard.offsetView(this.swipeVelocity.x, this.swipeVelocity.y);
         }
-        this.clientSpriteManager.tick();
+        this.hexBoard.clientSpriteManager.tick();
 
     }
 
@@ -193,6 +195,18 @@ export class ClientGameManager {
 
         var item = this.hexBoard.getHexAtPoint(x, y);
         if (!item) return;
+
+
+        if(this.hexBoard.clientSpriteManager.getSpriteAtTile(item))return;
+
+        var sprite = new ClientHeliSprite();
+        sprite.x = item.getRealX();
+        sprite.y = item.getRealY();
+        sprite.tile = item;
+        sprite.key = 'Heli';
+
+        this.hexBoard.clientSpriteManager.addSprite(sprite);
+        return;
 
         item.setHighlight(ClientGameManager.selectedHighlightColor);
         item.setHeightOffset(.25);

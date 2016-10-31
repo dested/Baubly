@@ -28,23 +28,23 @@ export class ClientMain {
         AssetManager.addAsset('tile', 'images/tile.png', size, base);
 
 
-        AssetManager.addAssetFrame('Heli.TopLeft',0, 'images/heli/top_left_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.TopLeft',1, 'images/heli/top_left_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.TopLeft',0, 'images/heli/top_left_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.TopLeft',1, 'images/heli/top_left_2.png', null, null);
 
-        AssetManager.addAssetFrame('Heli.TopRight',0, 'images/heli/top_right_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.TopRight',1, 'images/heli/top_right_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.TopRight',0, 'images/heli/top_right_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.TopRight',1, 'images/heli/top_right_2.png', null, null);
 
-        AssetManager.addAssetFrame('Heli.BottomLeft',0, 'images/heli/bottom_left_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.BottomLeft',1, 'images/heli/bottom_left_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.BottomLeft',0, 'images/heli/bottom_left_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.BottomLeft',1, 'images/heli/bottom_left_2.png', null, null);
 
-        AssetManager.addAssetFrame('Heli.BottomRight',0, 'images/heli/bottom_right_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.BottomRight',1, 'images/heli/bottom_right_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.BottomRight',0, 'images/heli/bottom_right_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.BottomRight',1, 'images/heli/bottom_right_2.png', null, null);
 
-        AssetManager.addAssetFrame('Heli.Bottom',0, 'images/heli/down_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.Bottom',1, 'images/heli/down_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.Bottom',0, 'images/heli/down_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.Bottom',1, 'images/heli/down_2.png', null, null);
 
-        AssetManager.addAssetFrame('Heli.Top',0, 'images/heli/up_1.png', size, base);
-        AssetManager.addAssetFrame('Heli.Top',1, 'images/heli/up_2.png', size, base);
+        AssetManager.addAssetFrame('Heli.Top',0, 'images/heli/up_1.png', null, null);
+        AssetManager.addAssetFrame('Heli.Top',1, 'images/heli/up_2.png', null, null);
 
         AssetManager.start();
     }
@@ -55,3 +55,5 @@ export class ClientMain {
 }
 
 ClientMain.run();
+
+

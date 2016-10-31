@@ -1,15 +1,17 @@
 ﻿import {GridHexagonConstants} from "../../common/hexLibraries/gridHexagonConstants";
 import {HexagonColor, DrawingUtils} from "../utils/drawingUtilities";
-import {GridHexagon} from "../../common/gridHexagon";
 import {HexBoard} from "../../common/hexBoard";
 import {HexBoardModel} from "../../common/models/hexBoard";
 import {ClientGridHexagon} from "./clientGridHexagon";
+import {ClientSpriteManager} from "../clientSpriteManager";
 
 export class ClientHexBoard extends HexBoard {
     viewPort = {x: 0, y: 0, width: 400, height: 400, padding: GridHexagonConstants.width * 2};
+    clientSpriteManager: ClientSpriteManager;
 
     constructor() {
         super();
+        this.clientSpriteManager = new ClientSpriteManager(this);
     }
 
     clientHexList: ClientGridHexagon[] = <ClientGridHexagon[]>this.hexList;
@@ -119,7 +121,16 @@ export class ClientHexBoard extends HexBoard {
         for (let i = 0; i < this.clientHexList.length; i++) {
             const gridHexagon = this.clientHexList[i];
             this.drawHexagon(context, gridHexagon);
+
+            for (var j = 0; j < this.clientSpriteManager.clientSprites.length; j++) {
+                var sprite = this.clientSpriteManager.clientSprites[j];
+                if (sprite.tile == gridHexagon && sprite.shouldDraw()) {
+                    sprite.draw(context);
+                }
+            }
         }
+
+        this.clientSpriteManager.draw(context);
         context.restore();
     }
 

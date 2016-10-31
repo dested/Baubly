@@ -8,7 +8,20 @@ export class SpriteManager {
     }
 
     tick() {
+        for (var i = 0; i < this.sprites.length; i++) {
+            var sprite = this.sprites[i];
+            sprite.tick();
+        }
+    }
 
+    getSpriteAtTile(item: GridHexagon): Sprite {
+
+        for (var i = 0; i < this.sprites.length; i++) {
+            var sprite = this.sprites[i];
+            if (sprite.tile.x == item.x && sprite.tile.y == item.y && sprite.tile.z == item.z)
+                return sprite;
+        }
+        return null;
     }
 
 }
@@ -23,4 +36,4 @@ export class Sprite {
     public tick() {
 
     }
-}
+} 
