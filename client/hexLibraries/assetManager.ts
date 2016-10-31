@@ -10,21 +10,14 @@ export interface AssetItem {
     url: string;
 }
 export class AssetManager {
-    assetQueue: {[key: string]: AssetItem} = {};
-    assets: {[key: string]: Asset} = {};
-    completed: ()=>void = null;
-    $assetsLoaded = 0;
-    $assetsRequested = 0;
-
-    static instance: AssetManager;
+    static assetQueue: {[key: string]: AssetItem} = {};
+    static assets: {[key: string]: Asset} = {};
+    static completed: ()=>void = null;
+    static $assetsLoaded = 0;
+    static $assetsRequested = 0;
 
 
-    constructor(completed: ()=>void) {
-        this.completed = completed;
-
-    }
-
-    start() {
+    static start() {
         for (const name in this.assetQueue) {
             if (this.assetQueue.hasOwnProperty(name)) {
                 const img = new Image();
@@ -39,12 +32,12 @@ export class AssetManager {
         }
     }
 
-    addAsset(name, url, size, base) {
+    static addAsset(name, url, size, base) {
         this.assetQueue[name] = {base, size, url};
         this.$assetsRequested++;
     }
 
-    $imageLoaded(img, name) {
+    static  $imageLoaded(img, name) {
         this.assets[name] = {
             image: img,
             size: null,

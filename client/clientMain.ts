@@ -14,18 +14,20 @@ export class ClientMain {
     }
 
     private static loadAssets(onComplete) {
-        AssetManager.instance = new AssetManager(onComplete);
+        AssetManager.completed=onComplete;
         var size = { width: 80, height: 80 };
         var base = { x: 40, y: 55 };
-        AssetManager.instance.addAsset('Infantry', 'images/tower_10.png', size, base);
-        AssetManager.instance.addAsset('Tank', 'images/tower_40.png', size, base);
-        AssetManager.instance.addAsset('Base', 'images/tower_42.png', size, base);
+        AssetManager.addAsset('Infantry', 'images/tower_10.png', size, base);
+        AssetManager.addAsset('Tank', 'images/tower_40.png', size, base);
+        AssetManager.addAsset('Base', 'images/tower_42.png', size, base);
 
 
-        AssetManager.instance.addAsset('Icon.Move', 'images/icons/move.png', size, base);
-        AssetManager.instance.addAsset('Icon.Attack', 'images/icons/attack.png', size, base);
+        AssetManager.addAsset('Icon.Move', 'images/icons/move.png', size, base);
+        AssetManager.addAsset('Icon.Attack', 'images/icons/attack.png', size, base);
 
-        AssetManager.instance.start();
+        AssetManager.addAsset('tile', 'images/tile.png', size, base);
+
+        AssetManager.start();
     }
 }
 

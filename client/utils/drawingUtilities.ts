@@ -1,3 +1,4 @@
+import {Point} from "../../common/utils";
 export class HexagonColor {
     color = "";
     darkBorder = "";
@@ -5,17 +6,19 @@ export class HexagonColor {
     dark2 = "";
     dark3 = "";
 
-    constructor(color) {
+    constructor(color: string) {
         this.color = color;
-        this.darkBorder = DrawingUtilities.colorLuminance(color, -0.45);
-        this.dark1 = DrawingUtilities.colorLuminance(color, -0.4);
-        this.dark2 = DrawingUtilities.colorLuminance(color, -0.55);
-        this.dark3 = DrawingUtilities.colorLuminance(color, -0.65);
+        this.darkBorder = DrawingUtils.colorLuminance(color, -0.45);
+        this.dark1 = DrawingUtils.colorLuminance(color, -0.4);
+        this.dark2 = DrawingUtils.colorLuminance(color, -0.55);
+        this.dark3 = DrawingUtils.colorLuminance(color, -0.65);
     }
+
 }
 
-export class DrawingUtilities {
-    static drawCircle(context) {
+export class DrawingUtils {
+
+    static drawCircle(context: CanvasRenderingContext2D) {
         context.beginPath();
         context.arc(0, 0, 5, 0, 2 * Math.PI, false);
         context.fillStyle = 'black';
@@ -23,7 +26,8 @@ export class DrawingUtilities {
         context.lineWidth = 5;
         context.stroke();
     };
-    static colorLuminance(hex, lum) {
+
+    static colorLuminance(hex: string, lum: number) {
         // validate hex string
         hex = hex.replace(new RegExp('[^0-9a-f]', 'gi'), '');
         // convert to decimal and change luminosity
@@ -35,7 +39,23 @@ export class DrawingUtilities {
         }
         return rgb;
     };
-    static pointInPolygon(pointX, pointY, polygon) {
+
+
+    static makeTransparent(hex: string, opacitiy: number): string {
+        // validate hex string
+        hex = hex.replace(new RegExp('[^0-9a-f]', 'gi'), '');
+        // convert to decimal and change luminosity
+        let rgb = 'rgba(';
+        for (let i = 0; i < 3; i++) {
+            const c = parseInt(hex.substr(i * 2, 2), 16);
+
+            rgb += c + ',';
+        }
+        rgb += opacitiy + ")";
+        return rgb;
+    };
+
+    static pointInPolygon(pointX: number, pointY: number, polygon: Point[]) {
         let isInside = false;
         for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
             if (polygon[i].y > pointY !== polygon[j].y > pointY &&

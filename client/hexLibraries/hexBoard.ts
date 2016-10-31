@@ -2,7 +2,7 @@
 import {Node, HexUtils, Vector3d} from "../../common/hexLibraries/HexUtils";
 import {GridHexagon} from "./GridHexagon";
 import {HexBoardModel} from "../../common/models/hexBoard";
-import {HexagonColor, DrawingUtilities} from "../utils/drawingUtilities";
+import {HexagonColor, DrawingUtils} from "../utils/drawingUtilities";
 
 export class HexBoard {
     hexList: GridHexagon[] = [];
@@ -13,7 +13,7 @@ export class HexBoard {
     constructor() {
     }
 
-    xyToHexIndex(x, y) :GridHexagon{
+    xyToHexIndex(x, y): GridHexagon {
         return this.hexBlock[x + y * 5000];
     }
 
@@ -36,13 +36,13 @@ export class HexBoard {
     setView(x, y) {
         this.viewPort.x = x;
         this.viewPort.y = y;
+        this.constrainViewPort();
     }
 
     constrainViewPort() {
         this.viewPort.x = Math.max(this.viewPort.x, 0 - this.viewPort.padding);
         this.viewPort.y = Math.max(this.viewPort.y, 0 - this.viewPort.padding);
         const size = this.gameDimensions();
-
         this.viewPort.x = Math.min(this.viewPort.x, size.width + this.viewPort.padding - this.viewPort.width);
         this.viewPort.y = Math.min(this.viewPort.y, size.height + this.viewPort.padding - this.viewPort.height)
     }
@@ -54,22 +54,18 @@ export class HexBoard {
 
         var otherColors = [];
 
-        for (var i = 0; i < 15; i++) {
-
-            otherColors[i] = new HexagonColor(DrawingUtilities.colorLuminance('#AFF000', (i / 15)));
-
+        for (var i = 0; i < 6; i++) {
+            otherColors[i] = new HexagonColor(DrawingUtils.colorLuminance('#AFF000', (i / 6)));
         }
 
         const ys = str.split('|');
-
-        for (let y = 0; y < ys.length; y++) {
+        for (let y = 0; y < board.height; y++) {
             const yItem = ys[y].split('');
-            for (let x = 0; x < yItem.length; x += 2) {
+            for (let x = 0; x < board.width; x++) {
                 const xItem = parseInt(yItem[x]);
-                // if (xItem == 0) continue;
 
                 let gridHexagon = new GridHexagon();
-                gridHexagon.x = x / 2;
+                gridHexagon.x = x ;
                 gridHexagon.y = 0;
                 gridHexagon.z = y;
                 gridHexagon.height = xItem == 0 ? 0 : xItem;
@@ -88,9 +84,11 @@ export class HexBoard {
 
     }
 
-    gameDimensions():{width:number,height:number} {
+    gameDimensions(): {width: number,height: number} {
         const size = {width: 0, height: 0};
-        size.width = GridHexagonConstants.width * 3 / 4 * this.boardSize.width;
+        size.width = GridHexagonConstants.width * (3 / 4) * this.boardSize.width;
+        console.log(GridHexagonConstants.width, (3 / 4), this.boardSize.width, GridHexagonConstants.width * (3 / 4) * this.boardSize.width);
+
         size.height = GridHexagonConstants.height() * this.boardSize.height;
         return size;
     }
@@ -106,16 +104,16 @@ export class HexBoard {
             let z = gridHexagon.z * GridHexagonConstants.height() + ((gridHexagon.x % 2 === 1) ? (-GridHexagonConstants.height() / 2) : 0);
             z -= gridHexagon.height * GridHexagonConstants.depthHeight();
             z += gridHexagon.y * GridHexagonConstants.depthHeight();
-            if (DrawingUtilities.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonTopPolygon())) {
+            if (DrawingUtils.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonTopPolygon())) {
                 lastClick = gridHexagon;
             }
-            if (DrawingUtilities.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthLeftPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
+            if (DrawingUtils.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthLeftPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
                 lastClick = gridHexagon;
             }
-            if (DrawingUtilities.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthBottomPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
+            if (DrawingUtils.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthBottomPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
                 lastClick = gridHexagon;
             }
-            if (DrawingUtilities.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthRightPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
+            if (DrawingUtils.pointInPolygon(clickX - x, clickY - z, GridHexagonConstants.hexagonDepthRightPolygon((gridHexagon.height + 1) * GridHexagonConstants.depthHeight()))) {
                 lastClick = gridHexagon;
             }
         }
@@ -148,7 +146,7 @@ export class HexBoard {
         const x = GridHexagonConstants.width * 3 / 4 * gridHexagon.x;
         let z = gridHexagon.z * GridHexagonConstants.height() + ((gridHexagon.x % 2 === 1) ? (-GridHexagonConstants.height() / 2) : 0);
 
-        z -= gridHexagon.height * GridHexagonConstants.depthHeight();
+        z -= gridHexagon.getDepthHeight();
         z += gridHexagon.y * GridHexagonConstants.depthHeight();
 
         if (!(x > this.viewPort.x - this.viewPort.padding &&
@@ -171,7 +169,7 @@ export class HexBoard {
         let aStar = [];
         let open = [myPathStart];
         let closed = [];
-        const result :Vector3d[]= [];
+        const result: Vector3d[] = [];
         let neighbours;
         let node;
         let path;

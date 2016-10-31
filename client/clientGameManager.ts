@@ -1,9 +1,7 @@
 import {HexagonColor} from "./utils/drawingUtilities";
 import {HexBoard} from "./hexLibraries/hexBoard";
 import {MenuManager} from "./hexLibraries/menuManager";
-import {AssetManager} from "./hexLibraries/assetManager";
 import {HexUtils} from "../common/hexLibraries/hexUtils";
-import {Point} from "../common/utils";
 import {GridHexagon} from "./hexLibraries/gridHexagon";
 declare var Hammer;
 export class ClientGameManager {
@@ -13,9 +11,9 @@ export class ClientGameManager {
     private context: CanvasRenderingContext2D;
 
     static baseColor = new HexagonColor('#FFFFFF');
-    static highlightColor = new HexagonColor('#51F9FF');
-    static selectedHighlightColor = new HexagonColor('#51F900');
-    static moveHighlightColor = new HexagonColor('#99F920');
+    static highlightColor = new HexagonColor('#00F9FF');
+    static selectedHighlightColor = new HexagonColor('#6B90FF');
+    static moveHighlightColor = new HexagonColor('#BE9EFF');
     static attackHighlightColor = new HexagonColor('#91F9CF');
 
 
@@ -23,8 +21,6 @@ export class ClientGameManager {
     tapStart = {x: 0, y: 0};
 
     constructor() {
-
-        var possiblePoints = [];
 
         this.hexBoard = new HexBoard();
 
@@ -40,7 +36,10 @@ export class ClientGameManager {
         mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
         mc.add(new Hammer.Swipe()).recognizeWith(mc.get('pan'));
         mc.add(new Hammer.Tap());
-
+        /*window.onresize = ()=> {
+            this.canvas.width = document.body.clientWidth;
+            this.canvas.height = document.body.clientHeight;
+        };*/
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
         overlay.style.width = '100vw';
@@ -82,36 +81,38 @@ export class ClientGameManager {
             this.swipeVelocity.x = this.swipeVelocity.y = 0;
 
 
-           /* if (this.menuManager.tap(x, y)) {
-                return;
-            }
-            this.menuManager.closeMenu();*/
+            /* if (this.menuManager.tap(x, y)) {
+             return;
+             }
+             this.menuManager.closeMenu();*/
 
 
             for (var i = 0; i < this.hexBoard.hexList.length; i++) {
                 var h = this.hexBoard.hexList[i];
                 h.setHighlight(null);
+                h.setHeightOffset(0);
             }
 
             var item = this.hexBoard.getHexAtPoint(x, y);
             if (!item) return;
 
             item.setHighlight(ClientGameManager.selectedHighlightColor);
+            item.setHeightOffset(1);
             this.startAction(item);
 
-/*
-            this.menuManager.openMenu([
-                    {image: AssetManager.instance.assets['Icon.Move'].image, action: 'Move'},
-                    {image: AssetManager.instance.assets['Icon.Attack'].image, action: 'Attack'}
-                ],
-                new Point(x, y),
-                (selectedItem) => {
-                    item.setHighlight(ClientGameManager.selectedHighlightColor);
-                    this.menuManager.closeMenu();
-                    this.startAction(item);
-                    currentState = 'highlighting';
-                });
-*/
+            /*
+             this.menuManager.openMenu([
+             {image: AssetManager.instance.assets['Icon.Move'].image, action: 'Move'},
+             {image: AssetManager.instance.assets['Icon.Attack'].image, action: 'Attack'}
+             ],
+             new Point(x, y),
+             (selectedItem) => {
+             item.setHighlight(ClientGameManager.selectedHighlightColor);
+             this.menuManager.closeMenu();
+             this.startAction(item);
+             currentState = 'highlighting';
+             });
+             */
         });
 
 
@@ -138,9 +139,9 @@ export class ClientGameManager {
             var spot = spots[i];
             if (spot == item || spot.unit) continue;
             var path = this.hexBoard.pathFind(item, spot);
-
             if (path.length > 1 && path.length <= radius + 1) {
                 spot.setHighlight(ClientGameManager.moveHighlightColor);
+                spot.setHeightOffset(.75);
             }
         }
     }
@@ -185,7 +186,10 @@ export class ClientGameManager {
                 this.swipeVelocity.y = 0;
             }
         }
-        this.hexBoard.offsetView(this.swipeVelocity.x, this.swipeVelocity.y);
+        // if (Math.abs(this.swipeVelocity.x) > 0 || Math.abs(this.swipeVelocity.y) > 0)
+        {
+            this.hexBoard.offsetView(this.swipeVelocity.x, this.swipeVelocity.y);
+        }
 
     }
 
