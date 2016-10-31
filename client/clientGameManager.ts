@@ -45,7 +45,7 @@ export class ClientGameManager {
         overlay.onmousemove = (ev)=> {
             var x = <number> ev.pageX;
             var y = <number> ev.pageY;
-            this.tapHex(x, y);
+            // this.tapHex(x, y);
         };
 
         window.onresize = ()=> {
@@ -128,8 +128,8 @@ export class ClientGameManager {
 
     findAvailableSpots(radius, center) {
         var items = [];
-        for (var q = 0; q < this.hexBoard.clientHexList.length; q++) {
-            var item = this.hexBoard.clientHexList[q];
+        for (var q = 0; q < this.hexBoard.hexList.length; q++) {
+            var item = <ClientGridHexagon> this.hexBoard.hexList[q];
             if (HexUtils.distance(center, item) <= radius) {
                 items.push(item);
             }
@@ -187,8 +187,8 @@ export class ClientGameManager {
          this.menuManager.closeMenu();*/
 
 
-        for (var i = 0; i < this.hexBoard.clientHexList.length; i++) {
-            var h = this.hexBoard.clientHexList[i];
+        for (var i = 0; i < this.hexBoard.hexList.length; i++) {
+            var h = <ClientGridHexagon> this.hexBoard.hexList[i];
             h.setHighlight(null);
             h.setHeightOffset(0);
         }
@@ -197,16 +197,18 @@ export class ClientGameManager {
         if (!item) return;
 
 
-        if(this.hexBoard.clientSpriteManager.getSpriteAtTile(item))return;
+        var sprites = this.hexBoard.clientSpriteManager.getSpritesAtTile(item);
+        if (!sprites || sprites.length === 0) {
 
-        var sprite = new ClientHeliSprite();
-        sprite.x = item.getRealX();
-        sprite.y = item.getRealY();
-        sprite.tile = item;
-        sprite.key = 'Heli';
 
-        this.hexBoard.clientSpriteManager.addSprite(sprite);
-        return;
+            var sprite = new ClientHeliSprite();
+            sprite.x = item.getRealX();
+            sprite.y = item.getRealY();
+            sprite.tile = item;
+            sprite.key = 'Heli';
+
+            this.hexBoard.clientSpriteManager.addSprite(sprite);
+        }
 
         item.setHighlight(ClientGameManager.selectedHighlightColor);
         item.setHeightOffset(.25);

@@ -2,9 +2,16 @@ import {GridHexagon} from "./gridHexagon";
 export class SpriteManager {
 
     sprites: Sprite[] = [];
+    spritesMap: {[tileKey: number]: Sprite[]} = {};
 
     addSprite(sprite: Sprite) {
         this.sprites.push(sprite);
+        if (sprite.tile) {
+            var sprites = this.spritesMap[sprite.tile.x + "-" + sprite.tile.z];
+            sprites = sprites || [];
+            sprites.push(sprite);
+            this.spritesMap[sprite.tile.x + "-" + sprite.tile.z] = sprites;
+        }
     }
 
     tick() {
@@ -14,14 +21,8 @@ export class SpriteManager {
         }
     }
 
-    getSpriteAtTile(item: GridHexagon): Sprite {
-
-        for (var i = 0; i < this.sprites.length; i++) {
-            var sprite = this.sprites[i];
-            if (sprite.tile.x == item.x && sprite.tile.y == item.y && sprite.tile.z == item.z)
-                return sprite;
-        }
-        return null;
+    getSpritesAtTile(item: GridHexagon): Sprite[] {
+        return this.spritesMap[item.x+"-"+item.z];
     }
 
 }
@@ -36,4 +37,4 @@ export class Sprite {
     public tick() {
 
     }
-} 
+}

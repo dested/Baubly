@@ -14,9 +14,6 @@ export class ClientHexBoard extends HexBoard {
         this.clientSpriteManager = new ClientSpriteManager(this);
     }
 
-    clientHexList: ClientGridHexagon[] = <ClientGridHexagon[]>this.hexList;
-    clientHexBlock: {[key: number]: ClientGridHexagon} = <{[key: number]: ClientGridHexagon}><any>this.hexBlock;
-
 
     resize(width, height) {
         this.viewPort.width = width;
@@ -81,7 +78,6 @@ export class ClientHexBoard extends HexBoard {
             }
         }
         this.reorderHexList();
-        this.clientHexList = <ClientGridHexagon[]>this.hexList;
     }
 
 
@@ -90,8 +86,8 @@ export class ClientHexBoard extends HexBoard {
         clickX += this.viewPort.x;
         clickY += this.viewPort.y;
 
-        for (let i = 0; i < this.clientHexList.length; i++) {
-            const gridHexagon = this.clientHexList[i];
+        for (let i = 0; i < this.hexList.length; i++) {
+            const gridHexagon = <ClientGridHexagon> this.hexList[i];
             const x = GridHexagonConstants.width * 3 / 4 * gridHexagon.x;
             let z = gridHexagon.z * GridHexagonConstants.height() + ((gridHexagon.x % 2 === 1) ? (-GridHexagonConstants.height() / 2) : 0);
             z -= gridHexagon.getDepthHeight();
@@ -118,14 +114,16 @@ export class ClientHexBoard extends HexBoard {
         context.save();
         context.translate(-this.viewPort.x, -this.viewPort.y);
         context.lineWidth = 1;
-        for (let i = 0; i < this.clientHexList.length; i++) {
-            const gridHexagon = this.clientHexList[i];
-            this.drawHexagon(context, gridHexagon);
-
-            for (var j = 0; j < this.clientSpriteManager.clientSprites.length; j++) {
-                var sprite = this.clientSpriteManager.clientSprites[j];
-                if (sprite.tile == gridHexagon && sprite.shouldDraw()) {
-                    sprite.draw(context);
+        for (let i = 0; i < this.hexList.length; i++) {
+            const gridHexagon = <ClientGridHexagon> this.hexList[i];
+            if (this.shouldDraw(gridHexagon)) {
+                this.drawHexagon(context, gridHexagon);
+                var sprites = this.clientSpriteManager.spritesMap[gridHexagon.x + "-" + gridHexagon.z];
+                if (sprites) {
+                    for (var j = 0; j < sprites.length; j++) {
+                        var sprite = sprites[j];
+                        sprite.draw(context);
+                    }
                 }
             }
         }
@@ -134,18 +132,23 @@ export class ClientHexBoard extends HexBoard {
         context.restore();
     }
 
-    drawHexagon(context: CanvasRenderingContext2D, gridHexagon: ClientGridHexagon) {
+    shouldDraw(gridHexagon: ClientGridHexagon) {
 
         const x = gridHexagon.getRealX();
         const y = gridHexagon.getRealY();
 
-        if (!(x > this.viewPort.x - this.viewPort.padding &&
+        return x > this.viewPort.x - this.viewPort.padding &&
             x < this.viewPort.x + this.viewPort.width + this.viewPort.padding &&
             y > this.viewPort.y - this.viewPort.padding &&
-            y < this.viewPort.y + this.viewPort.height + this.viewPort.padding)) {
-            return;
-        }
+            y < this.viewPort.y + this.viewPort.height + this.viewPort.padding;
 
+
+    }
+
+    drawHexagon(context: CanvasRenderingContext2D, gridHexagon: ClientGridHexagon) {
+
+        const x = gridHexagon.getRealX();
+        const y = gridHexagon.getRealY();
         context.save();
         context.translate(x, y);
         gridHexagon.draw(context);

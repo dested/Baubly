@@ -1,9 +1,8 @@
 import {SpriteManager, Sprite} from "../common/spriteManager";
 import {AssetManager} from "./hexLibraries/assetManager";
 import {ClientHexBoard} from "./hexLibraries/clientHexBoard";
+import {GridHexagonConstants} from "../common/hexLibraries/gridHexagonConstants";
 export class ClientSpriteManager extends SpriteManager {
-
-    clientSprites: ClientBaseSprite[] = <ClientBaseSprite[]>this.sprites;
 
     constructor(private clientHexBoard: ClientHexBoard) {
         super();
@@ -15,8 +14,8 @@ export class ClientSpriteManager extends SpriteManager {
     }
 
     draw(context: CanvasRenderingContext2D) {
-        for (var i = 0; i < this.clientSprites.length; i++) {
-            var sprite = this.clientSprites[i];
+        for (var i = 0; i < this.sprites.length; i++) {
+            var sprite = <ClientBaseSprite> this.sprites[i];
             if (sprite.tile == null && sprite.shouldDraw()) {
                 sprite.draw(context);
             }
@@ -78,7 +77,7 @@ export class ClientSixDirectionSprite extends ClientBaseSprite {
         var assetName = this.key + '.' + this.currentDirectionToSpriteName();
         var asset = AssetManager.assets[assetName];
         var image = asset.images[this.animationFrame];
-        context.drawImage(image, -asset.base.x, -asset.base.y);
+        context.drawImage(image, -asset.base.x, -asset.base.y - this.hoverY() - GridHexagonConstants.depthHeight() / 2);
         context.restore();
     }
 
@@ -99,6 +98,10 @@ export class ClientSixDirectionSprite extends ClientBaseSprite {
             default :
                 throw "Direction not found";
         }
+    }
+
+    private hoverY() {
+        return (Math.sin(this._drawTickNumber / 10)) * 12 - 6;
     }
 }
 
