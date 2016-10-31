@@ -1,11 +1,13 @@
 ﻿import {GridHexagonConstants} from "./hexLibraries/gridHexagonConstants";
 import {GridHexagon} from "./gridHexagon";
 import {HexUtils, Node, Vector3d} from "./hexLibraries/hexUtils";
+import {SpriteManager} from "./spriteManager";
 
 export class HexBoard {
     hexList: GridHexagon[] = [];
     hexBlock: {[key: number]: GridHexagon} = {};
     boardSize = {width: 0, height: 0};
+    spriteManager:SpriteManager;
 
     gameDimensions(): {width: number,height: number} {
         const size = {width: 0, height: 0};

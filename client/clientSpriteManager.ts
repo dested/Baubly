@@ -33,10 +33,10 @@ export abstract class ClientBaseSprite extends Sprite {
     animationSpeed: number;
 
     animationFrame: number = 0;
-    _drawTickNumber: number = 0;
+    _drawTickNumber: number = (Math.random()*1000)|0;
 
-    constructor(totalFrames: number, animationSpeed: number) {
-        super();
+    constructor(clientSpriteManager:ClientSpriteManager,totalFrames: number, animationSpeed: number) {
+        super(clientSpriteManager);
         this.animationSpeed = animationSpeed;
         this.totalFrames = totalFrames;
     }
@@ -106,7 +106,7 @@ export class ClientSixDirectionSprite extends ClientBaseSprite {
 }
 
 export class ClientHeliSprite extends ClientSixDirectionSprite {
-    constructor() {
-        super(2, 10)
+    constructor(clientSpriteManager:ClientSpriteManager) {
+        super(clientSpriteManager,2, 10)
     }
 }

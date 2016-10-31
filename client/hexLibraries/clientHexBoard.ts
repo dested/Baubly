@@ -3,7 +3,7 @@ import {HexagonColor, DrawingUtils} from "../utils/drawingUtilities";
 import {HexBoard} from "../../common/hexBoard";
 import {HexBoardModel} from "../../common/models/hexBoard";
 import {ClientGridHexagon} from "./clientGridHexagon";
-import {ClientSpriteManager} from "../clientSpriteManager";
+import {ClientSpriteManager, ClientHeliSprite, ClientBaseSprite} from "../clientSpriteManager";
 
 export class ClientHexBoard extends HexBoard {
     viewPort = {x: 0, y: 0, width: 400, height: 400, padding: GridHexagonConstants.width * 2};
@@ -11,7 +11,7 @@ export class ClientHexBoard extends HexBoard {
 
     constructor() {
         super();
-        this.clientSpriteManager = new ClientSpriteManager(this);
+        this.clientSpriteManager = this.spriteManager = new ClientSpriteManager(this);
     }
 
 
@@ -75,6 +75,16 @@ export class ClientHexBoard extends HexBoard {
                 }
                 gridHexagon.buildPaths();
                 this.addHexagon(gridHexagon);
+
+                if (Math.random() * 100 < 5) {
+
+                    var sprite = new ClientHeliSprite(this.clientSpriteManager);
+                    sprite.setTile(gridHexagon);
+                    sprite.key = 'Heli';
+
+                    this.clientSpriteManager.addSprite(sprite);
+                }
+
             }
         }
         this.reorderHexList();
@@ -118,10 +128,10 @@ export class ClientHexBoard extends HexBoard {
             const gridHexagon = <ClientGridHexagon> this.hexList[i];
             if (this.shouldDraw(gridHexagon)) {
                 this.drawHexagon(context, gridHexagon);
-                var sprites = this.clientSpriteManager.spritesMap[gridHexagon.x + "-" + gridHexagon.z];
+                var sprites = this.clientSpriteManager.spritesMap[gridHexagon.x + gridHexagon.z * 5000];
                 if (sprites) {
                     for (var j = 0; j < sprites.length; j++) {
-                        var sprite = sprites[j];
+                        var sprite = <ClientBaseSprite> sprites[j];
                         sprite.draw(context);
                     }
                 }

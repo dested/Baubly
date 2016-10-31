@@ -4,6 +4,7 @@ import {MenuManager} from "./hexLibraries/menuManager";
 import {HexUtils} from "../common/hexLibraries/hexUtils";
 import {ClientGridHexagon} from "./hexLibraries/clientGridHexagon";
 import {ClientHexBoard} from "./hexLibraries/clientHexBoard";
+import {GridHexagon} from "../common/gridHexagon";
 declare var Hammer;
 export class ClientGameManager {
     private menuManager: MenuManager;
@@ -115,8 +116,9 @@ export class ClientGameManager {
         var radius = 5;
         var spots = this.findAvailableSpots(radius, item);
         for (var i = 0; i < spots.length; i++) {
-            var spot = spots[i];
-            if (spot == item || spot.unit) continue;
+            var spot = <ClientGridHexagon> spots[i];
+            var sprites = this.hexBoard.clientSpriteManager.spritesMap[spot.x + spot.z * 5000];
+            if (spot == item || (sprites && sprites.length > 0)) continue;
             var path = this.hexBoard.pathFind(item, spot);
             if (path.length > 1 && path.length <= radius + 1) {
                 spot.setHighlight(ClientGameManager.moveHighlightColor);
@@ -126,10 +128,11 @@ export class ClientGameManager {
     }
 
 
-    findAvailableSpots(radius, center) {
+    findAvailableSpots(radius, center): GridHexagon[] {
         var items = [];
         for (var q = 0; q < this.hexBoard.hexList.length; q++) {
-            var item = <ClientGridHexagon> this.hexBoard.hexList[q];
+            var item = this.hexBoard.hexList[q];
+
             if (HexUtils.distance(center, item) <= radius) {
                 items.push(item);
             }
@@ -198,21 +201,13 @@ export class ClientGameManager {
 
 
         var sprites = this.hexBoard.clientSpriteManager.getSpritesAtTile(item);
-        if (!sprites || sprites.length === 0) {
-
-
-            var sprite = new ClientHeliSprite();
-            sprite.x = item.getRealX();
-            sprite.y = item.getRealY();
-            sprite.tile = item;
-            sprite.key = 'Heli';
-
-            this.hexBoard.clientSpriteManager.addSprite(sprite);
+        if (sprites && sprites.length > 0) {
+            var sprite = sprites[0];
+            item.setHighlight(ClientGameManager.selectedHighlightColor);
+            item.setHeightOffset(.25);
+            this.startAction(item);
         }
 
-        item.setHighlight(ClientGameManager.selectedHighlightColor);
-        item.setHeightOffset(.25);
-        this.startAction(item);
 
         /*
          this.menuManager.openMenu([
