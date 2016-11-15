@@ -16,7 +16,7 @@ export class SpriteManager {
     }
 
     getSpritesAtTile(item: GridHexagon): Sprite[] {
-        return this.spritesMap[item.x + item.z * 5000];
+        return this.spritesMap[item.x + item.z * 5000]||[];
     }
 
 }
@@ -24,7 +24,7 @@ export class SpriteManager {
 export class Sprite {
     public x: number;
     public y: number;
-    private tile: GridHexagon;
+    tile: GridHexagon;
     public key: string;
     public spriteManager: SpriteManager;
 

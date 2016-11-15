@@ -5,6 +5,7 @@ import {HexUtils} from "../common/hexLibraries/hexUtils";
 import {ClientGridHexagon} from "./hexLibraries/clientGridHexagon";
 import {ClientHexBoard} from "./hexLibraries/clientHexBoard";
 import {GridHexagon} from "../common/gridHexagon";
+import {GameBoard} from "../server/gameBoard";
 declare var Hammer;
 export class ClientGameManager {
     private menuManager: MenuManager;
@@ -98,6 +99,7 @@ export class ClientGameManager {
 
         this.draw();
 
+
         fetch('http://localhost:9847/game-state', {})
             .then(response => {
                 response.text()
@@ -108,6 +110,7 @@ export class ClientGameManager {
             .catch((err) => {
                 console.log('Fetch Error :-S', err);
             });
+        // this.hexBoard.initialize(GameBoard.generateBoard());
 
 
     }
@@ -180,6 +183,8 @@ export class ClientGameManager {
 
     }
 
+    private selectedHex: GridHexagon;
+
     private tapHex(x: number, y: number) {
         this.swipeVelocity.x = this.swipeVelocity.y = 0;
 
@@ -199,6 +204,31 @@ export class ClientGameManager {
         var item = this.hexBoard.getHexAtPoint(x, y);
         if (!item) return;
 
+
+        if (this.selectedHex) {
+            let sprite = <ClientHeliSprite> this.hexBoard.clientSpriteManager.getSpritesAtTile(this.selectedHex)[0];
+            if (!sprite) {
+                this.selectedHex = null;
+                return;
+            }
+
+            var path = this.hexBoard.pathFind(this.selectedHex, item);
+            for (let i = 1; i < path.length; i++) {
+                let p = path[i];
+                let oldP = path[i - 1];
+                // var direction = HexUtils.getDirection(oldP,p);
+                // sprite.currentDirection = direction;
+                setTimeout(()=> {
+                    var direction = HexUtils.getDirection(oldP,p);
+                    sprite.currentDirection = direction;
+                    sprite.setTile(this.hexBoard.getHexAtSpot(p.x, p.y, p.z));
+                }, i * 500);
+            }
+            this.selectedHex = null;
+            return;
+        }
+
+        this.selectedHex = item;
 
         var sprites = this.hexBoard.clientSpriteManager.getSpritesAtTile(item);
         if (sprites && sprites.length > 0) {

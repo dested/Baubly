@@ -60,24 +60,66 @@ export class ClientGridHexagon extends GridHexagon {
     }
 
     drawLeftDepth(context: CanvasRenderingContext2D) {
+        context.save();
+        context.save();
+        {
+            context.clip(this.leftDepthPath);
+
+            context.fillStyle = context.createPattern(AssetManager.assets['tile'].image, 'repeat');
+            context.fillRect(-GridHexagonConstants.width / 2, -GridHexagonConstants.height() / 2, GridHexagonConstants.width * 2, GridHexagonConstants.height() * 2); // context.fillRect(x, y, width, height);
+
+            context.fillStyle = DrawingUtils.makeTransparent(this.getDrawingColor().dark1, 0.75);
+            context.fill(this.leftDepthPath);
+        }
+        context.restore();
+        context.lineWidth = 3;
+
+
         context.strokeStyle = this.getDrawingColor().dark1;
         context.stroke(this.leftDepthPath);
-        context.fillStyle = this.getDrawingColor().dark1;
-        context.fill(this.leftDepthPath);
+        context.restore();
     }
 
     drawBottomDepth(context: CanvasRenderingContext2D) {
+        context.save();
+        context.save();
+        {
+            context.clip(this.bottomDepthPath);
+
+            context.fillStyle = context.createPattern(AssetManager.assets['tile'].image, 'repeat');
+            context.fillRect(-GridHexagonConstants.width / 2, -GridHexagonConstants.height() / 2, GridHexagonConstants.width * 2, GridHexagonConstants.height() * 2); // context.fillRect(x, y, width, height);
+
+            context.fillStyle = DrawingUtils.makeTransparent(this.getDrawingColor().dark2, 0.75);
+            context.fill(this.bottomDepthPath);
+        }
+        context.restore();
+        context.lineWidth = 3;
+
+
         context.strokeStyle = this.getDrawingColor().dark2;
         context.stroke(this.bottomDepthPath);
-        context.fillStyle = this.getDrawingColor().dark2;
-        context.fill(this.bottomDepthPath);
+        context.restore();
     }
 
     drawRightDepth(context: CanvasRenderingContext2D) {
+        context.save();
+        context.save();
+        {
+            context.clip(this.rightDepthPath);
+
+            context.fillStyle = context.createPattern(AssetManager.assets['tile'].image, 'repeat');
+            context.fillRect(-GridHexagonConstants.width / 2, -GridHexagonConstants.height() / 2, GridHexagonConstants.width * 2, GridHexagonConstants.height() * 2); // context.fillRect(x, y, width, height);
+
+            context.fillStyle = DrawingUtils.makeTransparent(this.getDrawingColor().dark3, 0.75);
+            context.fill(this.rightDepthPath);
+        }
+        context.restore();
+
+        context.lineWidth = 3;
+
         context.strokeStyle = this.getDrawingColor().dark3;
         context.stroke(this.rightDepthPath);
-        context.fillStyle = this.getDrawingColor().dark3;
-        context.fill(this.rightDepthPath);
+        context.restore();
     }
 
     drawTop(context: CanvasRenderingContext2D) {
@@ -100,7 +142,6 @@ export class ClientGridHexagon extends GridHexagon {
 
             context.strokeStyle = this.getDrawingColor().darkBorder;
             context.stroke(this.topPath);
-
         }
         context.restore();
     }

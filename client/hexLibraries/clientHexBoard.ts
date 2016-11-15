@@ -91,6 +91,16 @@ export class ClientHexBoard extends HexBoard {
     }
 
 
+    getHexAtSpot(x: number, y: number, z: number): ClientGridHexagon {
+        for (let i = 0; i < this.hexList.length; i++) {
+            const gridHexagon = <ClientGridHexagon> this.hexList[i];
+            if (gridHexagon.x === x && gridHexagon.y === y && gridHexagon.z === z) {
+                return gridHexagon;
+            }
+        }
+        return null;
+    }
+
     getHexAtPoint(clickX, clickY): ClientGridHexagon {
         let lastClick: ClientGridHexagon = null;
         clickX += this.viewPort.x;
